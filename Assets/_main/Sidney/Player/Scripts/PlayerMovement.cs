@@ -8,14 +8,14 @@ public class PlayerMovement : MonoBehaviour
     private bool isFacingRight = true;
 
     private bool isWallSliding;
-    private float wallSlidingSpeed = 2f;
+    private float wallSlidingSpeed = 5f;
 
     private bool isWallJumping;
     private float wallJumpingDirection;
     private float wallJumpingTime = 0.2f;
     private float wallJumpingCounter;
     private float wallJumpingDuration = 0.2f;
-    private Vector2 wallJumpingPower = new Vector2(12f, 30f);
+    public Vector2 wallJumpingPower = new Vector2(12f, 30f);
 
     private bool isDashing = false; // New flag to check if player is dashing
     private bool canDash = true;
