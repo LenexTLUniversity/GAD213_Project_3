@@ -70,29 +70,19 @@ public class PowerUpHandler : MonoBehaviour
         activePowerUps.Remove(powerUpName);
     }
 
-    public void UseDash()
+    // Method to get the current dash count
+    public int GetDashCount()
+    {
+        return dashCount;
+    }
+
+    // Method to reduce the dash count when a dash is used
+    public void ReduceDashCount()
     {
         if (dashCount > 0)
         {
             dashCount--;
-            Debug.Log("Dash used! Remaining dashes: " + dashCount);
-
-            // Determine the dash direction based on the player's facing direction
-            float dashForce = 10f;
-
-            // Get the direction the player is facing
-            float dashDirection = playerMovement.transform.localScale.x > 0 ? 1f : -1f; // Facing right is positive, left is negative
-
-            Debug.Log($"Dash direction: {dashDirection} (1 = right, -1 = left)");
-
-            // Apply dash velocity
-            Rigidbody2D rb = playerMovement.GetComponent<Rigidbody2D>();
-
-            // Ensure dash only modifies horizontal movement (keep current vertical velocity)
-            float currentYVelocity = rb.velocity.y;  // Save current vertical velocity
-            rb.velocity = new Vector2(dashForce * dashDirection, currentYVelocity);  // Modify horizontal velocity only
-
-            Debug.Log($"Player Velocity after Dash: {rb.velocity}");
+            Debug.Log($"Dash used! Remaining dashes: {dashCount}");
         }
         else
         {

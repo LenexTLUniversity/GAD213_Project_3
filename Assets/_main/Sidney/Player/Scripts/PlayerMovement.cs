@@ -17,9 +17,14 @@ public class PlayerMovement : MonoBehaviour
     private float wallJumpingDuration = 0.2f;
     private Vector2 wallJumpingPower = new Vector2(12f, 30f);
 
-    private PowerUpHandler powerUpHandler;
-
     private bool isDashing = false; // New flag to check if player is dashing
+    private bool canDash = true;
+
+    public float dashingPower;
+    public float dashingTime;
+    public float dashingCooldown;
+
+    private PowerUpHandler powerUpHandler;
 
     [SerializeField] public float speed = 8f;
     [SerializeField] public float jumpingPower = 16f;
@@ -28,6 +33,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Transform wallCheck;
     [SerializeField] private LayerMask wallLayer;
+    [SerializeField] private TrailRenderer tr;
 
     private void Start()
     {
@@ -59,9 +65,10 @@ public class PlayerMovement : MonoBehaviour
             Flip();
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftShift) && !isDashing)
+        // Only allow dash if dashCount > 0
+        if (Input.GetKeyDown(KeyCode.LeftShift) && powerUpHandler.GetDashCount() > 0 && canDash)
         {
-            powerUpHandler.UseDash();
+            StartCoroutine(Dash());
         }
     }
 
@@ -148,14 +155,26 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    // This function is now called to initiate the dash and set the flag
-    public void StartDash()
+    private IEnumerator Dash()
     {
+        canDash = false;
         isDashing = true;
-    }
+        float originalGravity = rb.gravityScale;
 
-    public void StopDash()
-    {
+        rb.gravityScale = 0f;
+        rb.velocity = new Vector2(transform.localScale.x * dashingPower, 0f);
+        tr.emitting = true;
+
+        // Reduce dashCount by 1 when dash is performed
+        powerUpHandler.ReduceDashCount();
+
+        yield return new WaitForSeconds(dashingTime);
+        tr.emitting = false;
+        rb.gravityScale = originalGravity;
         isDashing = false;
+
+        yield return new WaitForSeconds(dashingCooldown);
+        canDash = true;
     }
+    
 }
