@@ -17,26 +17,38 @@ public class PlayerMovement : MonoBehaviour
     private float wallJumpingDuration = 0.2f;
     private Vector2 wallJumpingPower = new Vector2(12f, 30f);
 
-    [SerializeField] private float speed = 8f;
-    [SerializeField] private float jumpingPower = 16f;
+    private PowerUpHandler powerUpHandler;
+
+    private bool isDashing = false; // New flag to check if player is dashing
+
+    [SerializeField] public float speed = 8f;
+    [SerializeField] public float jumpingPower = 16f;
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Transform wallCheck;
     [SerializeField] private LayerMask wallLayer;
 
+    private void Start()
+    {
+        powerUpHandler = GetComponent<PowerUpHandler>();
+    }
+
     private void Update()
     {
         horizontal = Input.GetAxisRaw("Horizontal");
 
-        if (Input.GetButtonDown("Jump") && IsGrounded())
+        if (!isDashing) // Prevent jumping while dashing
         {
-            rb.velocity = new Vector2(rb.velocity.x, jumpingPower);
-        }
+            if (Input.GetButtonDown("Jump") && IsGrounded())
+            {
+                rb.velocity = new Vector2(rb.velocity.x, jumpingPower);
+            }
 
-        if (Input.GetButtonUp("Jump") && rb.velocity.y > 0f)
-        {
-            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
+            if (Input.GetButtonUp("Jump") && rb.velocity.y > 0f)
+            {
+                rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.5f);
+            }
         }
 
         WallSlide();
@@ -46,13 +58,21 @@ public class PlayerMovement : MonoBehaviour
         {
             Flip();
         }
+
+        if (Input.GetKeyDown(KeyCode.LeftShift) && !isDashing)
+        {
+            powerUpHandler.UseDash();
+        }
     }
 
     private void FixedUpdate()
     {
-        if (!isWallJumping)
+        if (!isDashing) // Only move normally if not dashing
         {
-            rb.velocity = new Vector2(horizontal * speed, rb.velocity.y);
+            if (!isWallJumping)
+            {
+                rb.velocity = new Vector2(horizontal * speed, rb.velocity.y);
+            }
         }
     }
 
@@ -126,5 +146,16 @@ public class PlayerMovement : MonoBehaviour
             localScale.x *= -1f;
             transform.localScale = localScale;
         }
+    }
+
+    // This function is now called to initiate the dash and set the flag
+    public void StartDash()
+    {
+        isDashing = true;
+    }
+
+    public void StopDash()
+    {
+        isDashing = false;
     }
 }
