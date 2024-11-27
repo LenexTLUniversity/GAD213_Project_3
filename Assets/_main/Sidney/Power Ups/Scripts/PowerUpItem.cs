@@ -5,6 +5,8 @@ using UnityEngine;
 public class PowerUpItem : MonoBehaviour
 {
     public PowerUp powerUp; // Assign a PowerUp ScriptableObject in the Inspector
+    public HungerAndHPManager hungerAndHPManager;  // Reference to the HungerAndHPManager script
+
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -22,6 +24,18 @@ public class PowerUpItem : MonoBehaviour
             else
             {
                 Debug.LogWarning("PowerUpHandler not found on Player.");
+            }
+            // Increase the hunger bar when the player eats the food
+            if (hungerAndHPManager != null)
+            {
+                Debug.Log("HungerAndHPManager found, increasing hunger...");
+                hungerAndHPManager.IncreaseHunger();  // Increase the hunger bar
+
+                Destroy(gameObject);  // Destroy the food object after consumption
+            }
+            else
+            {
+                Debug.LogWarning("HungerAndHPManager not assigned.");
             }
         }
         else

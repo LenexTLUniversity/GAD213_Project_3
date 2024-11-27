@@ -343,7 +343,7 @@ Transform:
   m_GameObject: {fileID: 6243888466316561710}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.30953363, y: -1.6862404, z: -10.027553}
+  m_LocalPosition: {x: -0.30953407, y: -1.6862404, z: -10.027553}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -740,7 +740,7 @@ Transform:
   m_GameObject: {fileID: 8038478833114881442}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.30953363, y: -1.6862404, z: -10.027553}
+  m_LocalPosition: {x: -0.30953407, y: -1.6862404, z: -10.027553}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1013,7 +1013,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cdf78f5e764bea44abd703681c4f7884, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 18
+  wallJumpingPower: {x: 12, y: 30}
+  dashingPower: 0
+  dashingTime: 0
+  dashingCooldown: 0
+  speed: 15
   jumpingPower: 35
   rb: {fileID: 4421351322539265947}
   groundCheck: {fileID: 1421359494334306126}
@@ -1024,3 +1028,4 @@ MonoBehaviour:
   wallLayer:
     serializedVersion: 2
     m_Bits: 128
+  tr: {fileID: 0}
