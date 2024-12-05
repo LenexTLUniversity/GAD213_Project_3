@@ -5,7 +5,6 @@ using UnityEngine;
 public class PowerUpItem : MonoBehaviour
 {
     public PowerUp powerUp; // Assign a PowerUp ScriptableObject in the Inspector
-    public HungerAndHPManager hungerAndHPManager;  // Reference to the HungerAndHPManager script
 
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -27,10 +26,10 @@ public class PowerUpItem : MonoBehaviour
             }
             if (collision.CompareTag("Player"))
             {
-                HungerAndHPManager manager = collision.GetComponent<HungerAndHPManager>();
-                if (manager != null)
+                HungerAndHPManager hungerAndHPManager = collision.GetComponent<HungerAndHPManager>();
+                if (hungerAndHPManager != null)
                 {
-                    manager.IncreaseHunger();
+                    hungerAndHPManager.IncreaseHunger(); 
                     Destroy(gameObject);
                 }
             }
