@@ -3,123 +3,108 @@ using UnityEngine.UI;
 
 public class HungerAndHPManager : MonoBehaviour
 {
-    public Slider hungerBarSlider;  // Reference to the hunger bar slider
-    public Slider hpBarSlider;      // Reference to the HP bar slider
-    public float playerSpeed; // The player's speed (set initially)
+    [Header("UI Elements")]
+    public Slider hungerBarSlider;   // Reference to the hunger bar slider
+    public Slider hpBarSlider;       // Reference to the HP bar slider
+    public GameObject gameOverPanel; // Reference to the Game Over Panel
 
-    private float maxHunger = 1f;  // Full hunger bar (can be changed if needed)
-    private float currentHunger = 1f;  // Start full
-    private float maxHP = 1f;  // Full HP
-    private float currentHP = 1f;  // Start full HP
-    private float hungerDepletionRate = 0.1f; // Rate at which hunger bar depletes
-    private float timeSinceLastMeal = 0f;  // Tracks time since last food consumption
-    private int hungerDepletionCount = 0;  // Tracks number of hunger depletions
-    private int foodEatenCount = 0;  // Tracks the number of food items eaten
+    [Header("Hunger and HP Settings")]
+    public float maxHunger = 1f;       // Maximum hunger value
+    public float maxHP = 1f;           // Maximum HP value
+    public float hungerDepletionRate = 0.1f;  // Speed of hunger depletion (per second)
+    public float foodRestoreAmount = 0.2f;    // Amount of hunger restored by food
+    public float hpDropAmount = 0.1f;         // Amount of HP lost when hunger depletes fully
 
-    private float speedDecreasePerHPDrop = 0.1f;  // How much speed decreases when HP drops
-    private float speedIncreasePerHPGain = 0.1f; // How much speed increases when HP gains
+    [Header("Player Speed Settings")]
+    public float baseSpeed = 15f;       // Starting speed of the player
+    public float minSpeed = 2f;        // Minimum speed of the player when HP is low
+    private float currentSpeed;        // Current speed of the player
+
+    private float currentHunger;       // Current hunger level
+    private float currentHP;           // Current HP level
+    private bool isPlayerDead = false; // Flag to check if the player is dead
+
+    void Start()
+    {
+        // Initialize hunger, HP, and speed
+        currentHunger = maxHunger;
+        currentHP = maxHP;
+        currentSpeed = baseSpeed;
+
+        // Ensure the game-over panel is hidden at start
+        if (gameOverPanel != null)
+            gameOverPanel.SetActive(false);
+
+        UpdateUI();
+    }
 
     void Update()
     {
-        HandleHungerDepletion();
-        UpdateUI();
-    }
+        if (isPlayerDead) return;
 
-    void HandleHungerDepletion()
-    {
-        // Track time since last food consumption
-        timeSinceLastMeal += Time.deltaTime;
+        // Deplete hunger over time
+        currentHunger -= hungerDepletionRate * Time.deltaTime;
 
-        // Debug log to check if time is passing correctly
-        Debug.Log("Time since last meal: " + timeSinceLastMeal);
-
-        // Deplete hunger if more than 8 seconds without food
-        if (timeSinceLastMeal >= 8f)
+        if (currentHunger <= 0)
         {
-            Debug.Log("Decreasing hunger after 8 seconds.");
-            DecreaseHunger();
-            timeSinceLastMeal = 0f;  // Reset time after hunger depletion
-        }
-    }
-
-
-
-    void DecreaseHunger()
-    {
-        if (currentHunger > 0f)
-        {
-            currentHunger -= hungerDepletionRate;  // Deplete hunger
-            hungerDepletionCount++;
-
-            // Every 2 depletions, reduce HP
-            if (hungerDepletionCount >= 2)
-            {
-                hungerDepletionCount = 0;
-                DecreaseHP();
-            }
+            currentHunger = maxHunger; // Reset hunger bar
+            DecreaseHP();             // Decrease HP
         }
 
-        // Update the hunger bar UI (Ensure this is happening)
         UpdateUI();
-    }
 
+        if (currentHP <= 0 && !isPlayerDead)
+        {
+            PlayerDies();
+        }
+    }
 
     public void IncreaseHunger()
     {
-        if (currentHunger < maxHunger)
-        {
-            currentHunger += 0.5f;  // Each food item increases hunger by 0.5 (adjust as needed)
-            foodEatenCount++;
+        if (isPlayerDead) return;
 
-            if (foodEatenCount >= 2) // Every two increases of hunger
-            {
-                foodEatenCount = 0;
-                IncreaseHP();
-            }
-        }
-
-        // Reset the timer since the player ate
-        timeSinceLastMeal = 0f;
+        currentHunger = Mathf.Min(currentHunger + foodRestoreAmount, maxHunger);
+        UpdateUI();
     }
 
-    void DecreaseHP()
+    private void DecreaseHP()
     {
-        if (currentHP > 0f)
+        // Decrease HP and adjust speed
+        currentHP -= hpDropAmount;
+        AdjustPlayerSpeed();
+        Debug.Log("HP decreased. Current HP: " + currentHP);
+    }
+
+    private void AdjustPlayerSpeed()
+    {
+        // Calculate speed based on current HP
+        currentSpeed = Mathf.Lerp(minSpeed, baseSpeed, currentHP / maxHP);
+        Debug.Log("Player speed adjusted to: " + currentSpeed);
+
+        // Apply the new speed to the player's movement script (if applicable)
+        PlayerMovement playerMovement = GetComponent<PlayerMovement>();
+        if (playerMovement != null)
         {
-            currentHP -= 0.1f;  // Decrease HP when hunger depletes
-
-            // Apply speed reduction based on the HP drop
-            playerSpeed = Mathf.Max(playerSpeed - speedDecreasePerHPDrop, 0f); // Ensures speed doesn't go negative
-
-            Debug.Log("HP decreased. Current HP: " + currentHP);
-            Debug.Log("Player speed decreased. Current speed: " + playerSpeed);
+            playerMovement.SetSpeed(currentSpeed);
         }
     }
 
-    void IncreaseHP()
+    private void PlayerDies()
     {
-        if (currentHP < maxHP)
+        isPlayerDead = true;
+
+        // Display the Game Over Panel
+        if (gameOverPanel != null)
         {
-            currentHP += 0.1f;  // Adjust the amount of HP gain
-            AdjustSpeed();
+            gameOverPanel.SetActive(true);
         }
+
+        Debug.Log("Player has died! Game Over!");
     }
 
-    void AdjustSpeed()
+    private void UpdateUI()
     {
-        // Adjust player speed based on HP
-        float speedChange = currentHP * speedIncreasePerHPGain;
-        playerSpeed = Mathf.Clamp(playerSpeed + speedChange, playerSpeed, playerSpeed); // Ensure it doesn't exceed the initial speed
-    }
-
-    void UpdateUI()
-    {
-        // Update hunger slider based on current hunger
         hungerBarSlider.value = currentHunger / maxHunger;
-
-        // Update HP slider based on current HP
         hpBarSlider.value = currentHP / maxHP;
     }
-
-
 }

@@ -26,7 +26,8 @@ public class PlayerMovement : MonoBehaviour
 
     private PowerUpHandler powerUpHandler;
 
-    [SerializeField] public float speed = 8f;
+    [SerializeField] public float speed = 15f;
+    [SerializeField] public float minSpeed = 2f; // Minimum speed based on HP
     [SerializeField] public float jumpingPower = 16f;
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private Transform groundCheck;
@@ -176,5 +177,11 @@ public class PlayerMovement : MonoBehaviour
         yield return new WaitForSeconds(dashingCooldown);
         canDash = true;
     }
-    
+
+    public void SetSpeed(float newSpeed)
+    {
+        speed = Mathf.Clamp(newSpeed, minSpeed, speed);
+        Debug.Log($"Player speed set to: {speed}");
+    }
+
 }

@@ -25,17 +25,14 @@ public class PowerUpItem : MonoBehaviour
             {
                 Debug.LogWarning("PowerUpHandler not found on Player.");
             }
-            // Increase the hunger bar when the player eats the food
-            if (hungerAndHPManager != null)
+            if (collision.CompareTag("Player"))
             {
-                Debug.Log("HungerAndHPManager found, increasing hunger...");
-                hungerAndHPManager.IncreaseHunger();  // Increase the hunger bar
-
-                Destroy(gameObject);  // Destroy the food object after consumption
-            }
-            else
-            {
-                Debug.LogWarning("HungerAndHPManager not assigned.");
+                HungerAndHPManager manager = collision.GetComponent<HungerAndHPManager>();
+                if (manager != null)
+                {
+                    manager.IncreaseHunger();
+                    Destroy(gameObject);
+                }
             }
         }
         else
