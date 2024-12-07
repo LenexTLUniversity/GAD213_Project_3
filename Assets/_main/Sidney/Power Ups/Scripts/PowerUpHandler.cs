@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PowerUpHandler : MonoBehaviour
 {
@@ -11,6 +12,10 @@ public class PowerUpHandler : MonoBehaviour
 
     private Dictionary<string, Coroutine> activePowerUps = new Dictionary<string, Coroutine>();
     private int dashCount = 0;
+
+    // UI elements for radial sliders
+    public Slider speedBoostSlider;  // Slider for Speed Boost
+    public Slider jumpBoostSlider;   // Slider for Jump Boost
 
     private void Start()
     {
@@ -24,18 +29,36 @@ public class PowerUpHandler : MonoBehaviour
         // Save default values from PlayerMovement
         defaultSpeed = playerMovement.speed;
         defaultJumpPower = playerMovement.jumpingPower;
+
+        // Initialize sliders to empty (0)
+        if (speedBoostSlider != null) speedBoostSlider.value = 0f;
+        if (jumpBoostSlider != null) jumpBoostSlider.value = 0f;
     }
 
     public void ApplyPowerUp(PowerUp powerUp)
     {
+        Debug.Log($"Applying Power-Up: {powerUp.powerUpName} (Duration: {powerUp.duration}, Effect: {powerUp.effectValue})");
+
         switch (powerUp.powerUpName)
         {
             case "Milk":
-                ResetOrStartPowerUp("Milk", powerUp.duration, () => playerMovement.jumpingPower = defaultJumpPower + powerUp.effectValue, () => playerMovement.jumpingPower = defaultJumpPower);
+                ResetOrStartPowerUp(
+                    "Milk",
+                    powerUp.duration,
+                    () => playerMovement.jumpingPower = defaultJumpPower + powerUp.effectValue,
+                    () => playerMovement.jumpingPower = defaultJumpPower,
+                    jumpBoostSlider
+                );
                 break;
 
             case "Chilly Pepper":
-                ResetOrStartPowerUp("Chilly Pepper", powerUp.duration, () => playerMovement.speed = defaultSpeed + powerUp.effectValue, () => playerMovement.speed = defaultSpeed);
+                ResetOrStartPowerUp(
+                    "Chilly Pepper",
+                    powerUp.duration,
+                    () => playerMovement.speed = defaultSpeed + powerUp.effectValue,
+                    () => playerMovement.speed = defaultSpeed,
+                    speedBoostSlider
+                );
                 break;
 
             case "Beans":
@@ -49,8 +72,19 @@ public class PowerUpHandler : MonoBehaviour
         }
     }
 
-    private void ResetOrStartPowerUp(string powerUpName, float duration, System.Action applyEffect, System.Action removeEffect)
+    private void ResetOrStartPowerUp(string powerUpName, float duration, System.Action applyEffect, System.Action removeEffect, Slider timerSlider)
     {
+        // Debug slider reference
+        if (timerSlider == null)
+        {
+            Debug.LogWarning($"No slider assigned for {powerUpName}. Skipping UI update.");
+        }
+        else
+        {
+            timerSlider.value = 1f;  // Set slider to full
+            Debug.Log($"Filling slider for {powerUpName}");
+        }
+
         // If power-up is already active, reset its timer
         if (activePowerUps.ContainsKey(powerUpName))
         {
@@ -59,15 +93,31 @@ public class PowerUpHandler : MonoBehaviour
         }
 
         applyEffect.Invoke(); // Apply the power-up effect
-        activePowerUps[powerUpName] = StartCoroutine(PowerUpDuration(powerUpName, duration, removeEffect));
+        activePowerUps[powerUpName] = StartCoroutine(PowerUpDuration(powerUpName, duration, removeEffect, timerSlider));
     }
 
-    private IEnumerator PowerUpDuration(string powerUpName, float duration, System.Action removeEffect)
+    private IEnumerator PowerUpDuration(string powerUpName, float duration, System.Action removeEffect, Slider timerSlider)
     {
-        yield return new WaitForSeconds(duration);
+        float timer = duration;
+        while (timer > 0)
+        {
+            if (timerSlider != null)
+            {
+                timerSlider.value = timer / duration;  // Update slider value
+            }
 
+            timer -= Time.deltaTime;
+            yield return null;  // Wait for the next frame
+        }
+
+        // Revert the effect when the timer ends
         removeEffect.Invoke(); // Revert to default state
         activePowerUps.Remove(powerUpName);
+
+        if (timerSlider != null)
+        {
+            timerSlider.value = 0f;  // Empty the slider
+        }
     }
 
     // Method to get the current dash count
