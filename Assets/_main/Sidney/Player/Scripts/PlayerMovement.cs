@@ -4,20 +4,20 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    private float horizontal;
+    public float horizontal;
     private bool isFacingRight = true;
 
-    private bool isWallSliding;
+    public bool isWallSliding;
     private float wallSlidingSpeed = 5f;
 
-    private bool isWallJumping;
+    public bool isWallJumping;
     private float wallJumpingDirection;
     private float wallJumpingTime = 0.2f;
     private float wallJumpingCounter;
     private float wallJumpingDuration = 0.2f;
     public Vector2 wallJumpingPower = new Vector2(12f, 30f);
 
-    private bool isDashing = false; // New flag to check if player is dashing
+    public bool isDashing = false; // New flag to check if player is dashing
     private bool canDash = true;
 
     public float dashingPower;
@@ -29,7 +29,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] public float speed = 15f;
     [SerializeField] public float minSpeed = 2f; // Minimum speed based on HP
     [SerializeField] public float jumpingPower = 16f;
-    [SerializeField] private Rigidbody2D rb;
+    [SerializeField] public Rigidbody2D rb;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private Transform wallCheck;
@@ -84,12 +84,12 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private bool IsGrounded()
+    public bool IsGrounded()
     {
         return Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
     }
 
-    private bool IsWalled()
+    public bool IsWalled()
     {
         return Physics2D.OverlapCircle(wallCheck.position, 0.2f, wallLayer);
     }
